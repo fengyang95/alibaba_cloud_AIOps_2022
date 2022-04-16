@@ -77,10 +77,10 @@ class HierarchicalClassifier:
 
         first_importances = sorted([(col, val) for col, val in zip(X.columns, self.first_cls.feature_importances_)],
                                    key=lambda val: -val[1])
-        print(F"first feature importances:{first_importances}")
+        #print(F"first feature importances:{first_importances}")
         second_importances = sorted([(col, val) for col, val in zip(X.columns, self.second_cls.feature_importances_)],
                                     key=lambda val: -val[1])
-        print(F"second feature importances:{second_importances}")
+        #print(F"second feature importances:{second_importances}")
         # useful_features=[col for col,val in second_importances[:50]]
         # print(f"{useful_features}")
 

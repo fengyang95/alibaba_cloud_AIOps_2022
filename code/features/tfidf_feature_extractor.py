@@ -45,8 +45,8 @@ class TFIDFFeatureExtractor:
                     tv_model = model_dict[_col][0]
                     tf_model = model_dict[_col][1]
                     count_model = model_dict[_col][2]
-                    print(f"_col:{_col}")
-                    print(f"tv_model:{tv_model.vocabulary_}")
+                    # print(f"_col:{_col}")
+                    # print(f"tv_model:{tv_model.vocabulary_}")
                     sentences = _text_df[_col].apply(lambda val: val.lower()).values
                     tfidf_features = tv_model.transform(sentences).A
                     # print(tfidf_features[:5])

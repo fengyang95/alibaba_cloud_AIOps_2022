@@ -1,9 +1,10 @@
 import pandas as pd
 import numpy as np
 import copy
-from sklearn.metrics import f1_score,roc_auc_score
+from sklearn.metrics import f1_score, roc_auc_score
 
-def macro_f1_val_helper(labels: np.array, preds: np.array, weights, verbose=True,
+
+def macro_f1_val_helper(labels: np.array, preds: np.array, weights, verbose=False,
                         ):
     df = pd.DataFrame({
         'labels': labels,
@@ -47,6 +48,6 @@ def macro_f1_val(labels: np.array, preds: np.array, verbost=True):
     labels_second = labels[(labels == 0) | (preds == 0) | (labels == 1) | (preds == 1)]
     preds_second = preds[(labels == 0) | (preds == 0) | (labels == 1) | (preds == 1)]
 
-    second_F1=macro_f1_val_helper(labels_second,preds_second,weights=[3/5,2/5])
+    second_F1 = macro_f1_val_helper(labels_second, preds_second, weights=[3 / 5, 2 / 5])
 
-    return overall_F1,first_F1,second_F1
+    return overall_F1, first_F1, second_F1
