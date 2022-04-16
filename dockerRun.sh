@@ -1,0 +1,1 @@
+docker run aiops2022:v20220416 sh run.sh
