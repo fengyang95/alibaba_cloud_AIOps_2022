@@ -29,7 +29,7 @@ def macro_f1_val_helper(labels: np.array, preds: np.array, weights, verbose=Fals
 
 
 def macro_f1_val(labels: np.array, preds: np.array, verbost=True):
-    overall_F1 = macro_f1_val_helper(labels, preds, weights=[3 / 7, 2 / 7, 1 / 7, 1 / 7])
+    overall_F1 = macro_f1_val_helper(labels, preds, weights=[5 / 11, 4 / 11, 1 / 11, 1 / 11])
 
     labels_first = copy.deepcopy(labels)
     preds_first = copy.deepcopy(preds)
@@ -41,13 +41,13 @@ def macro_f1_val(labels: np.array, preds: np.array, verbost=True):
     preds_first[preds_first == 2] = 1
     preds_first[preds_first == 3] = 2
 
-    first_F1 = macro_f1_val_helper(labels_first, preds_first, weights=[5 / 7, 1 / 7, 1 / 7])
+    first_F1 = macro_f1_val_helper(labels_first, preds_first, weights=[9 / 11, 1 / 11, 1 / 11])
 
     # labels_second=copy.deepcopy(labels)
     # preds_second=copy.deepcopy(preds)
     labels_second = labels[(labels == 0) | (preds == 0) | (labels == 1) | (preds == 1)]
     preds_second = preds[(labels == 0) | (preds == 0) | (labels == 1) | (preds == 1)]
 
-    second_F1 = macro_f1_val_helper(labels_second, preds_second, weights=[3 / 5, 2 / 5])
+    second_F1 = macro_f1_val_helper(labels_second, preds_second, weights=[5 / 9, 4 / 9])
 
     return overall_F1, first_F1, second_F1
