@@ -222,7 +222,7 @@ class WorkFlow:
 if __name__ == '__main__':
     data_dir = 'data'
 
-    submit_dir = 'tcdata_test'
+    submit_dir = 'tcdata'
 
     log_df = pd.read_csv(os.path.join(data_dir, 'preliminary_sel_log_dataset.csv'))
     log_df2 = pd.read_csv(os.path.join(data_dir, 'preliminary_sel_log_dataset_a.csv'))

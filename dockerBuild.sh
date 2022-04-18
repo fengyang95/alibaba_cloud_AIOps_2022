@@ -6,5 +6,5 @@ if [ -n "$privatetag" ]; then
   tag=$tag-$privatetag
 fi
 
-echo "docker build -t aiops2022:$tag "
-docker build -t aiops2022:$tag .
+#echo "docker build -t aiops2022:$tag "
+docker build -t aiops2022:latest .
