@@ -139,7 +139,19 @@ class BaggingClassifer:
                 "reg_alpha": 0.2,
                 "reg_lambda": 8,
             }
+
+            # lgb_param = {
+            #     "n_estimators": 150,
+            #     "num_leaves": 31,
+            #     "colsample_bytree": 0.85,
+            #     "subsample": 0.6,
+            #     "subsample_freq": 3,
+            #     "min_child_samples": 20,
+            #     "reg_alpha": 0.4,
+            #     "reg_lambda": 7.5,
+            # }
             self.lgb_list = [LGBMClassifier(class_weight=class_weight, **lgb_param) for _ in range(self.k_fold)]
+
 
             kfold = KFold(n_splits=self.k_fold, shuffle=True, random_state=2022)
             f1_list=[]
@@ -217,6 +229,8 @@ class BaggingClassifer:
                     "min_child_samples": trial.suggest_int("min_child_samples", 20, 100)
                 }
 
+
+
                 cls = LGBMClassifier(class_weight=class_weight, **param)
 
                 f_scores = []
@@ -241,7 +255,7 @@ class BaggingClassifer:
                 return np.mean(np.array(f_scores))#+np.min(np.array(f_scores))
 
             study = optuna.create_study(direction="maximize")
-            study.optimize(objective, n_trials=1)
+            study.optimize(objective, n_trials=100)
 
             print("Number of finished trials: {}".format(len(study.trials)))
 

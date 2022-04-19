@@ -490,22 +490,22 @@ class BaseFeatureExtractor:
         fault_df = fault_df.drop_duplicates().reset_index(drop=True)
         fault_df['fault_time_date'] = pd.to_datetime(fault_df['fault_time'])
         #
-        fault_df['_'.join([self.num_feature_prefix, 'sin_time'])] = fault_df['fault_time'].apply(
-            lambda val: self.sin_time(val))
-        fault_df['_'.join([self.num_feature_prefix, 'cos_time'])] = fault_df['fault_time'].apply(
-            lambda val: self.cos_time(val))
-        fault_df['_'.join([self.num_feature_prefix, 'sin_day'])] = fault_df['fault_time'].apply(
-            lambda val: self.sin_day(val))
-        fault_df['_'.join([self.num_feature_prefix, 'cos_day'])] = fault_df['fault_time'].apply(
-            lambda val: self.cos_day(val))
-
-        fault_df['_'.join([self.num_feature_prefix, 'is_day_time'])] = fault_df['fault_time'].apply(
-            lambda val: self.is_daytime(val))
-
-        fault_df['_'.join([self.num_feature_prefix, 'is_work_day'])] = fault_df['fault_time_date'].apply(
-            lambda val: int(is_workday(val)))
-        fault_df['_'.join([self.num_feature_prefix, 'is_in_lieu'])] = fault_df['fault_time_date'].apply(
-            lambda val: int(is_in_lieu(val)))
+        # fault_df['_'.join([self.num_feature_prefix, 'sin_time'])] = fault_df['fault_time'].apply(
+        #     lambda val: self.sin_time(val))
+        # fault_df['_'.join([self.num_feature_prefix, 'cos_time'])] = fault_df['fault_time'].apply(
+        #     lambda val: self.cos_time(val))
+        # fault_df['_'.join([self.num_feature_prefix, 'sin_day'])] = fault_df['fault_time'].apply(
+        #     lambda val: self.sin_day(val))
+        # fault_df['_'.join([self.num_feature_prefix, 'cos_day'])] = fault_df['fault_time'].apply(
+        #     lambda val: self.cos_day(val))
+        #
+        # fault_df['_'.join([self.num_feature_prefix, 'is_day_time'])] = fault_df['fault_time'].apply(
+        #     lambda val: self.is_daytime(val))
+        #
+        # fault_df['_'.join([self.num_feature_prefix, 'is_work_day'])] = fault_df['fault_time_date'].apply(
+        #     lambda val: int(is_workday(val)))
+        # fault_df['_'.join([self.num_feature_prefix, 'is_in_lieu'])] = fault_df['fault_time_date'].apply(
+        #     lambda val: int(is_in_lieu(val)))
 
         return fault_df
 

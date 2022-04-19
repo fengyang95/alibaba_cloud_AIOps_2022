@@ -90,7 +90,7 @@ class WorkFlow:
                            or 'tfidf_feature' in _col
                            # or 'doc2vec_feature' in _col
                            # or 'tf_feature' in _col
-                           # or 'count_vec_feature' in _col
+                           or 'count_vec_feature' in _col
                            ] + ['server_model']+[_col for _col in df_all.columns if _col.startswith('venus') or _col.startswith('crashdump')]
 
         # feature_columns = [_col for _col in df_all.columns if _col.startswith('num_feature')] + ['server_model']
@@ -187,7 +187,7 @@ class WorkFlow:
         # # print(f"auc_train:{np.mean(auc_train_list):.4f}  auc_val:{np.mean(auc_val_list):.4f}")
         # probas = []
         #
-        cls = BaggingClassifer(k_fold=5, tuna=False)
+        cls = BaggingClassifer(k_fold=9, tuna=False)
         cat_features=[col for col in X.columns if 'catfeature' in col ]
         cls.fit(X, y, cat_features=['server_model']+cat_features)
         logging.info(f"train done!")
@@ -224,6 +224,9 @@ if __name__ == '__main__':
 
     submit_dir = 'tcdata'
 
+    import time
+    begin=time.time()
+
     log_df = pd.read_csv(os.path.join(data_dir, 'preliminary_sel_log_dataset.csv'))
     log_df2 = pd.read_csv(os.path.join(data_dir, 'preliminary_sel_log_dataset_a.csv'))
     log_df3 = pd.read_csv(os.path.join(submit_dir, 'final_sel_log_dataset_a.csv'))
@@ -254,3 +257,5 @@ if __name__ == '__main__':
     for i in range(1):
         result_df = work_flow.executor()
         result_df.to_csv(f'result.csv', index=False)
+
+    logging.info(f"time:{time.time()-begin:.1f}s")

@@ -4,7 +4,7 @@ import copy
 from sklearn.metrics import f1_score, roc_auc_score
 
 
-def macro_f1_val_helper(labels: np.array, preds: np.array, weights, verbose=False,
+def macro_f1_val_helper(labels: np.array, preds: np.array, weights, verbose=True,
                         ):
     df = pd.DataFrame({
         'labels': labels,
