@@ -254,6 +254,7 @@ if __name__ == '__main__':
     logging.info(f"load data done!")
     work_flow = WorkFlow(log_df, fault_label_df, fault_venus_df,fault_crashdump_df,
                          submit_df,submit_venus_df,submit_crashdump_df)
+
     for i in range(1):
         result_df = work_flow.executor()
         result_df.to_csv(f'result.csv', index=False)
