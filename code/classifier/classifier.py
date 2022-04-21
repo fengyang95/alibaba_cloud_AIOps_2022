@@ -77,10 +77,10 @@ class HierarchicalClassifier:
 
         first_importances = sorted([(col, val) for col, val in zip(X.columns, self.first_cls.feature_importances_)],
                                    key=lambda val: -val[1])
-        #print(F"first feature importances:{first_importances}")
+        # print(F"first feature importances:{first_importances}")
         second_importances = sorted([(col, val) for col, val in zip(X.columns, self.second_cls.feature_importances_)],
                                     key=lambda val: -val[1])
-        #print(F"second feature importances:{second_importances}")
+        # print(F"second feature importances:{second_importances}")
         # useful_features=[col for col,val in second_importances[:50]]
         # print(f"{useful_features}")
 
@@ -103,7 +103,7 @@ class HierarchicalClassifier:
 class BaggingClassifer:
 
     @staticmethod
-    def aug(X,y,n_aug=3,cat_features=None,aug_prob=0.5):
+    def aug(X, y, n_aug=3, cat_features=None, aug_prob=0.5):
 
         aug_X = pd.concat([copy.deepcopy(X) for _ in range(n_aug)], axis=0)
         aug_y = pd.concat([copy.deepcopy(y) for _ in range(n_aug)], axis=0)
@@ -122,7 +122,7 @@ class BaggingClassifer:
         new_X = pd.concat([X, aug_X], axis=0).reset_index(drop=True)
         new_y = pd.concat([y, aug_y], axis=0).reset_index(drop=True)
 
-        return new_X,new_y
+        return new_X, new_y
 
     class LGBMClassifierKFold:
         def __init__(self, kfold=5):
@@ -151,6 +151,16 @@ class BaggingClassifer:
                 "reg_lambda": 8,
             }
 
+            lgb_param3 = {
+                "n_estimators": 350,
+                "num_leaves": 28,
+                "colsample_bytree": 0.61,
+                "subsample": 0.77,
+                "subsample_freq": 6,
+                "min_child_samples": 22,
+                "reg_alpha": 0.7,
+                "reg_lambda": 0.3,
+            }
 
             # lgb_param = {
             #     "n_estimators": 150,
@@ -163,41 +173,46 @@ class BaggingClassifer:
             #     "reg_lambda": 7.5,
             # }
             self.lgb_list1 = [LGBMClassifier(class_weight=class_weight, **lgb_param1) for _ in range(self.k_fold)]
-            #self.lgb_list2=[CatBoostClassifier(class_weights=class_weight,verbose=False) for _ in range(self.k_fold)]
-            self.lgb_list2=[LGBMClassifier(class_weight=class_weight,**lgb_param2) for _ in range(self.k_fold)]
-
+            # self.lgb_list2=[CatBoostClassifier(class_weights=class_weight,verbose=False) for _ in range(self.k_fold)]
+            self.lgb_list2 = [LGBMClassifier(class_weight=class_weight, **lgb_param2) for _ in range(self.k_fold)]
+            self.lgb_list3=[LGBMClassifier(class_weight=class_weight,**lgb_param3) for _ in range(self.k_fold)]
 
             kfold = KFold(n_splits=self.k_fold, shuffle=True, random_state=2022)
-            f1_list=[]
+            f1_list = []
             for fold_index, (train_index, val_index) in enumerate(kfold.split(X)):
                 X_train = X.iloc[train_index]
                 y_train = y[train_index]
                 X_val = X.iloc[val_index]
                 y_val = y[val_index]
 
-                X_train_aug,y_train_aug=BaggingClassifer.aug(X_train,y_train,n_aug=3,cat_features=categorical_feature,aug_prob=0.5)
-                #X_train_aug,y_train_aug=X_train,y_train
+                X_train_aug, y_train_aug = BaggingClassifer.aug(X_train, y_train, n_aug=3,
+                                                                cat_features=categorical_feature, aug_prob=0.5)
+                # X_train_aug,y_train_aug=X_train,y_train
                 self.lgb_list1[fold_index].fit(X_train_aug, y_train_aug, categorical_feature=categorical_feature)
-                self.lgb_list2[fold_index].fit(X_train_aug,y_train_aug,categorical_feature=categorical_feature)
-
-                preds = np.argmax(self.lgb_list1[fold_index].predict_proba(X_val)+self.lgb_list2[fold_index].predict_proba(X_val),
-                                  axis=1)
+                self.lgb_list2[fold_index].fit(X_train_aug, y_train_aug, categorical_feature=categorical_feature)
+                self.lgb_list3[fold_index].fit(X_train_aug, y_train_aug, categorical_feature=categorical_feature)
+                preds = np.argmax(
+                    self.lgb_list1[fold_index].predict_proba(X_val) + self.lgb_list2[fold_index].predict_proba(X_val)+
+                    self.lgb_list3[fold_index].predict_proba(X_val),
+                    axis=1)
                 pred_labels = np.rint(preds)
 
-                preds_train=np.argmax(self.lgb_list1[fold_index].predict_proba(X_train)+self.lgb_list2[fold_index].predict_proba(X_train),
-                                      axis=1)
-                f1_train=macro_f1_val(y_train,np.rint(preds_train))[0]
+                preds_train = np.argmax(
+                    self.lgb_list1[fold_index].predict_proba(X_train) + self.lgb_list2[fold_index].predict_proba(
+                        X_train)+self.lgb_list3[fold_index].predict_proba(X_train),
+                    axis=1)
+                f1_train = macro_f1_val(y_train, np.rint(preds_train))[0]
 
                 f1 = macro_f1_val(y_val, pred_labels)[0]
                 print(f"fold_index:{fold_index} val_F1:{f1} train_F1:{f1_train}")
                 f1_list.append(f1)
             print(f"overall F1:{np.mean(f1_list)}")
 
-
         def predict(self, X):
             y = None
             for i in range(self.k_fold):
-                curr_y = np.argmax(self.lgb_list1[i].predict_proba(X)+self.lgb_list2[i].predict_proba(X),axis=1)
+                curr_y = np.argmax(self.lgb_list1[i].predict_proba(X) + self.lgb_list2[i].predict_proba(X)+
+                                   self.lgb_list3[i].predict_proba(X), axis=1)
                 if y is None:
                     y = curr_y[:, np.newaxis]
                 else:
@@ -246,8 +261,6 @@ class BaggingClassifer:
                     "min_child_samples": trial.suggest_int("min_child_samples", 20, 100)
                 }
 
-
-
                 cls = LGBMClassifier(class_weight=class_weight, **param)
 
                 f_scores = []
@@ -260,8 +273,8 @@ class BaggingClassifer:
 
                     # X_train_aug, y_train_aug = BaggingClassifer.aug(X_train, y_train, n_aug=1,
                     #                                                 cat_features=categorical_feature, aug_prob=0.5)
-                    X_train_aug,y_train_aug=X_train,y_train
-                    #self.lgb_list[fold_index].fit(X_train_aug, y_train_aug, categorical_feature=categorical_feature)
+                    X_train_aug, y_train_aug = X_train, y_train
+                    # self.lgb_list[fold_index].fit(X_train_aug, y_train_aug, categorical_feature=categorical_feature)
 
                     cls.fit(X_train_aug, y_train_aug, categorical_feature=categorical_feature)
                     preds = cls.predict(X_val)
@@ -269,7 +282,7 @@ class BaggingClassifer:
                     f1 = macro_f1_val(y_val, pred_labels)[0]
                     f_scores.append(f1)
 
-                return np.mean(np.array(f_scores))#+np.min(np.array(f_scores))
+                return np.mean(np.array(f_scores))  # +np.min(np.array(f_scores))
 
             study = optuna.create_study(direction="maximize")
             study.optimize(objective, n_trials=100)
@@ -283,22 +296,32 @@ class BaggingClassifer:
             for key, value in trial.params.items():
                 print("    {}: {}".format(key, value))
 
-            self.lgb=lgb.LGBMClassifier(class_weight=class_weight,**trial.params)
-            self.lgb.fit(X,y,categorical_feature=categorical_feature)
-            print(f"train_score:{macro_f1_val(y,self.lgb.predict(X))}")
+            self.lgb_list = [lgb.LGBMClassifier(class_weight=class_weight, **trial.params) for _ in range(self.kfold)]
+            kfold = KFold(n_splits=self.kfold, shuffle=True, random_state=2022)
+            for fold_index, (train_index, val_index) in enumerate(kfold.split(X)):
+                X_train = X.iloc[train_index]
+                y_train = y[train_index]
+                X_val = X.iloc[val_index]
+                y_val = y[val_index]
+                # X_train_aug, y_train_aug = BaggingClassifer.aug(X_train, y_train, n_aug=1,
+                #                                                 cat_features=categorical_feature, aug_prob=0.5)
+                X_train_aug, y_train_aug = X_train, y_train
+                # self.lgb_list[fold_index].fit(X_train_aug, y_train_aug, categorical_feature=categorical_feature)
+                self.lgb_list[fold_index].fit(X_train_aug, y_train_aug, categorical_feature=categorical_feature)
+
 
         def predict(self, X):
-            # y = None
-            # for i in range(self.kfold):
-            #     curr_y = self.lgb_list[i].predict(X)
-            #     if y is None:
-            #         y = curr_y[:, np.newaxis]
-            #     else:
-            #         y = np.concatenate((y, curr_y[:, np.newaxis]), axis=1)
-            # ans = []
-            # for i in range(len(y)):
-            #     ans.append(int(np.argmax(np.bincount(y[i]))))
-            ans=self.lgb.predict(X)
+            y = None
+            for i in range(self.kfold):
+                curr_y = self.lgb_list[i].predict(X)
+                if y is None:
+                    y = curr_y[:, np.newaxis]
+                else:
+                    y = np.concatenate((y, curr_y[:, np.newaxis]), axis=1)
+            ans = []
+            for i in range(len(y)):
+                ans.append(int(np.argmax(np.bincount(y[i]))))
+            #ans = self.lgb.predict(X)
             return np.array(ans)
 
         def predict_proba(self, X):
@@ -308,9 +331,8 @@ class BaggingClassifer:
         self.tuna = tuna
         self.k_fold = k_fold
 
-        self.lgbkfold=self.LGBMClassifierKFold(kfold=k_fold)
+        self.lgbkfold = self.LGBMClassifierKFold(kfold=k_fold)
         self.lgb_tuna = self.LGBMClassifierTuna(kfold=k_fold)
-
 
     def fit(self, X, y, cat_features=None, aug=True, n_aug=3,
             aug_prob=0.5):
@@ -323,7 +345,7 @@ class BaggingClassifer:
         if self.tuna is True:
             self.lgb_tuna.fit(X, y, categorical_feature=cat_features, class_weight=class_weight)
         else:
-            self.lgbkfold.fit(X, y, categorical_feature=cat_features,class_weight=class_weight)
+            self.lgbkfold.fit(X, y, categorical_feature=cat_features, class_weight=class_weight)
         #              eval_class_weight={0: 3, 1: 2, 2: 1, 3: 1})
         # # self.ngboost.fit(X,y,sample_weight=sample_weight)
 

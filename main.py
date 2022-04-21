@@ -8,18 +8,19 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
+
 class WorkFlow:
     def __init__(self, log_df: pd.DataFrame,
-                 fault_label_df: pd.DataFrame,fault_venus_df:pd.DataFrame,fault_crash_dump_df:pd.DataFrame,
-                 submit_df: pd.DataFrame,submit_venus_df:pd.DataFrame,submit_crash_dump_df:pd.DataFrame):
+                 fault_label_df: pd.DataFrame, fault_venus_df: pd.DataFrame, fault_crash_dump_df: pd.DataFrame,
+                 submit_df: pd.DataFrame, submit_venus_df: pd.DataFrame, submit_crash_dump_df: pd.DataFrame):
         self.log_df = log_df
         self.fault_label_df = fault_label_df
-        self.fault_venus_df=fault_venus_df
-        self.fault_crash_dump_df=fault_crash_dump_df
+        self.fault_venus_df = fault_venus_df
+        self.fault_crash_dump_df = fault_crash_dump_df
 
         self.submit_df = submit_df
-        self.submit_venus_df=submit_venus_df
-        self.submit_crash_dump_df=submit_crash_dump_df
+        self.submit_venus_df = submit_venus_df
+        self.submit_crash_dump_df = submit_crash_dump_df
 
         self.tfidf_feature_extractor = TFIDFFeatureExtractor()
 
@@ -27,20 +28,20 @@ class WorkFlow:
                     doc2vec_model=None):
         if train is True:
             _fault_df = self.fault_label_df.copy(deep=True)
-            _venus_df=self.fault_venus_df.copy(deep=True)
-            _crashdump_df=self.fault_crash_dump_df.copy(deep=True)
+            _venus_df = self.fault_venus_df.copy(deep=True)
+            _crashdump_df = self.fault_crash_dump_df.copy(deep=True)
 
             fault_columns = ['sn', 'fault_time', 'label']
         else:
             _fault_df = self.submit_df.copy(deep=True)
-            _venus_df=self.submit_venus_df.copy(deep=True)
-            _crashdump_df=self.submit_crash_dump_df.copy(deep=True)
+            _venus_df = self.submit_venus_df.copy(deep=True)
+            _crashdump_df = self.submit_crash_dump_df.copy(deep=True)
             fault_columns = ['sn', 'fault_time']
 
         _log_df = copy.deepcopy(self.log_df)
-        base_feature_extractor = BaseFeatureExtractor(_fault_df, _log_df,_crashdump_df,_venus_df)
+        base_feature_extractor = BaseFeatureExtractor(_fault_df, _log_df, _crashdump_df, _venus_df)
 
-        _num_feature_df, _text_feature_df, _sentences_feature_df, _processed_log_df,_venus_feature_df,_crashdump_feature_df= base_feature_extractor.extract_features()
+        _num_feature_df, _text_feature_df, _sentences_feature_df, _processed_log_df, _venus_feature_df, _crashdump_feature_df = base_feature_extractor.extract_features()
 
         _text_columns = fault_columns + [_col for _col in _text_feature_df.columns if
                                          _col.startswith(
@@ -70,11 +71,10 @@ class WorkFlow:
         df_all = _num_feature_df.merge(text_feature_df_overall, on=fault_columns,
                                        how='left').reset_index(drop=True)
 
-        df_all=df_all.merge(_venus_feature_df,on=fault_columns,
-                            how='left',).reset_index(drop=True)
-        df_all=df_all.merge(_crashdump_feature_df,on=fault_columns,
-                            how='left').reset_index(drop=True)
-
+        df_all = df_all.merge(_venus_feature_df, on=fault_columns,
+                              how='left', ).reset_index(drop=True)
+        df_all = df_all.merge(_crashdump_feature_df, on=fault_columns,
+                              how='left').reset_index(drop=True)
 
         if _sentences_feature_df is not None:
             tmp_log_df = _log_df.copy(deep=True)
@@ -91,7 +91,8 @@ class WorkFlow:
                            # or 'doc2vec_feature' in _col
                            # or 'tf_feature' in _col
                            or 'count_vec_feature' in _col
-                           ] + ['server_model']+[_col for _col in df_all.columns if _col.startswith('venus') or _col.startswith('crashdump')]
+                           ] + ['server_model'] + [_col for _col in df_all.columns if
+                                                   _col.startswith('venus') or _col.startswith('crashdump')]
 
         # feature_columns = [_col for _col in df_all.columns if _col.startswith('num_feature')] + ['server_model']
         print(f"features:{feature_columns}")
@@ -115,8 +116,30 @@ class WorkFlow:
         global copy
         data_dict = self.get_samples(train=True)
         X = data_dict['X']
-
         y = data_dict['y']
+        # import numpy as np
+        # def analys(_X, _y):
+        #     _X_values=copy.deepcopy(X.values).astype(np.float)
+        #
+        #     print(f"{np.mean(_X_values,axis=0).shape}")
+        #
+        #     _X_values=(_X_values-np.mean(_X_values,axis=0))/np.std(_X_values,axis=0)
+        #     print(_X_values.shape)
+        #     N=len(_X_values)
+        #     A=np.zeros((N,N))
+        #     for i in range(N):
+        #         deta=np.sum(np.square(_X_values[i]-_X_values[i+1:]),axis=1)
+        #         A[i,i+1:]=deta
+        #         A[i+1:,i]=deta
+        #     return A
+        #
+        # A=analys(X, y)
+        # print(np.where(A<1e-2))
+        # print(np.percentile(A,5))
+        # print(np.percentile(A,1))
+        # print(np.percentile(A,0.1))
+        # print(np.percentile(A,0.01))
+
         tfidf_model_dict = data_dict['tfidf_model_dict']
         doc2vec_model = data_dict['doc2vec_model']
 
@@ -188,8 +211,8 @@ class WorkFlow:
         # probas = []
         #
         cls = BaggingClassifer(k_fold=9, tuna=False)
-        cat_features=[col for col in X.columns if 'catfeature' in col ]
-        cls.fit(X, y, cat_features=['server_model']+cat_features)
+        cat_features = [col for col in X.columns if 'catfeature' in col]
+        cls.fit(X, y, cat_features=['server_model'] + cat_features)
         logging.info(f"train done!")
         train_pred = cls.predict(X)
         logging.info(f"train macro-F1:{macro_f1_val(y, train_pred)}")
@@ -225,26 +248,24 @@ if __name__ == '__main__':
     submit_dir = 'tcdata'
 
     import time
-    begin=time.time()
+
+    begin = time.time()
 
     log_df = pd.read_csv(os.path.join(data_dir, 'preliminary_sel_log_dataset.csv'))
     log_df2 = pd.read_csv(os.path.join(data_dir, 'preliminary_sel_log_dataset_a.csv'))
     log_df3 = pd.read_csv(os.path.join(submit_dir, 'final_sel_log_dataset_a.csv'))
     log_df = pd.concat((log_df, log_df2, log_df3), axis=0).reset_index(drop=True)
 
-
     fault_label_df = pd.read_csv(os.path.join(data_dir, 'preliminary_train_label_dataset.csv'))
     fault_label_df2 = pd.read_csv(os.path.join(data_dir, 'preliminary_train_label_dataset_s.csv'))
     fault_label_df = pd.concat((fault_label_df, fault_label_df2), axis=0).reset_index(drop=True)
 
-    fault_venus_df=pd.read_csv(os.path.join(data_dir,'preliminary_venus_dataset.csv'))
-    fault_crashdump_df=pd.read_csv(os.path.join(data_dir,'preliminary_crashdump_dataset.csv'))
+    fault_venus_df = pd.read_csv(os.path.join(data_dir, 'preliminary_venus_dataset.csv'))
+    fault_crashdump_df = pd.read_csv(os.path.join(data_dir, 'preliminary_crashdump_dataset.csv'))
 
     submit_df = pd.read_csv(os.path.join(submit_dir, 'final_submit_dataset_a.csv'))
-    submit_venus_df=pd.read_csv(os.path.join(submit_dir,'final_venus_dataset_a.csv'))
-    submit_crashdump_df=pd.read_csv(os.path.join(submit_dir,'final_crashdump_dataset_a.csv'))
-
-
+    submit_venus_df = pd.read_csv(os.path.join(submit_dir, 'final_venus_dataset_a.csv'))
+    submit_crashdump_df = pd.read_csv(os.path.join(submit_dir, 'final_crashdump_dataset_a.csv'))
 
     extra_fault_df = submit_df.copy(deep=True)
     extra_fault_df['label'] = -1
@@ -252,11 +273,10 @@ if __name__ == '__main__':
     fault_label_df = pd.concat((fault_label_df, extra_fault_df), axis=0).reset_index(drop=True)
 
     logging.info(f"load data done!")
-    work_flow = WorkFlow(log_df, fault_label_df, fault_venus_df,fault_crashdump_df,
-                         submit_df,submit_venus_df,submit_crashdump_df)
+    work_flow = WorkFlow(log_df, fault_label_df, fault_venus_df, fault_crashdump_df,
+                         submit_df, submit_venus_df, submit_crashdump_df)
 
-    for i in range(1):
-        result_df = work_flow.executor()
-        result_df.to_csv(f'result.csv', index=False)
+    result_df = work_flow.executor()
+    result_df.to_csv('result.csv', index=False)
 
-    logging.info(f"time:{time.time()-begin:.1f}s")
+    logging.info(f"time:{time.time() - begin:.1f}s")
