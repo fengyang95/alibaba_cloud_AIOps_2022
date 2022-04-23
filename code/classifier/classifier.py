@@ -152,7 +152,7 @@ class BaggingClassifer:
             }
 
             lgb_param3 = {
-                "n_estimators": 350,
+                "n_estimators": 200,
                 "num_leaves": 28,
                 "colsample_bytree": 0.61,
                 "subsample": 0.77,
@@ -161,6 +161,7 @@ class BaggingClassifer:
                 "reg_alpha": 0.7,
                 "reg_lambda": 0.3,
             }
+
 
             # lgb_param = {
             #     "n_estimators": 150,
@@ -185,12 +186,16 @@ class BaggingClassifer:
                 X_val = X.iloc[val_index]
                 y_val = y[val_index]
 
-                X_train_aug, y_train_aug = BaggingClassifer.aug(X_train, y_train, n_aug=3,
-                                                                cat_features=categorical_feature, aug_prob=0.5)
-                # X_train_aug,y_train_aug=X_train,y_train
+                # X_train_aug, y_train_aug = BaggingClassifer.aug(X_train, y_train, n_aug=3,
+                #                                                 cat_features=categorical_feature, aug_prob=0.5)
+                X_train_aug,y_train_aug=X_train,y_train
                 self.lgb_list1[fold_index].fit(X_train_aug, y_train_aug, categorical_feature=categorical_feature)
                 self.lgb_list2[fold_index].fit(X_train_aug, y_train_aug, categorical_feature=categorical_feature)
                 self.lgb_list3[fold_index].fit(X_train_aug, y_train_aug, categorical_feature=categorical_feature)
+                feature_importances = sorted(
+                    [(col, val) for col, val in zip(X.columns, self.lgb_list1[fold_index].feature_importances_)],
+                    key=lambda val: -val[1])
+                print(f"feature_importances:{feature_importances}")
                 preds = np.argmax(
                     self.lgb_list1[fold_index].predict_proba(X_val) + self.lgb_list2[fold_index].predict_proba(X_val)+
                     self.lgb_list3[fold_index].predict_proba(X_val),

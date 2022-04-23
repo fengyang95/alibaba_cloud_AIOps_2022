@@ -11,49 +11,79 @@ from datetime import datetime
 from .util import SPACE_STR, MIN_DF, TIME_FORMAT, STOP_WORDS
 
 
+def module_to_cat_int(module):
+    counter = {'module1': 83, 'module1,module7': 56, 'module1,module8': 41, 'module4': 31,
+               'module9': 29, 'module7': 25, 'module0': 21, 'module10,module11,module3,module4,module9': 16,
+               'module8': 14, 'module3': 14, 'module10': 13, 'module11': 13, 'module3,module4': 9,
+               'module3,module7': 8, 'module2': 7, 'port a,module1,module7': 3,
+               'module10,module11,module9': 3, 'module0,module8': 2, 'port a,module1': 2,
+               'port a,module1,module8': 2, 'module10,module4': 2, 'module11,module4,module9': 2,
+               'module19': 2, 'module4,module9': 2, 'port a,module11': 1, 'port a,module8': 1,
+               'port c,module1,module8': 1, 'module10,module9': 1,
+               'module10,module11,module14,module3,module4,module9': 1,
+               'module11,module4': 1, 'module10,module11,module13,module3,module4,module9': 1,
+               'module10,module11,module7,module9': 1,
+               'in traffic control,irpp0,pcie rootport 0:0.0,module10,module12,module19,module5,module9': 1,
+               'module12,module19,module5': 1, 'module12,module19,module5,module9': 1,
+               'irpp0,pcie rootport 0:0.0,module4': 1, 'module5,module9': 1,
+               'module0,module1': 1, 'module10,module3,module4': 1,
+               'module10,module7': 1, 'module11,module3,module4,module9': 1,
+               'module3,module9': 1, 'pcie rootport 2b:3.0,port a,module8': 1,
+               'module17,module19,module3,module4': 1,
+               'module10,module11,module12,module13,module14,module3,module4,module9': 1,
+               'module10,module11,module12,module14,module3,module4,module9': 1, 'module11,module3,module4': 1,
+               'module10,module11,module3,module4,module8,module9': 1,
+               'module10,module11,module19,module3,module4,module5,module9': 1, 'module19,module3,module4': 1,
+               'irpp1,pcie rootport a2:0.0,module10,module11,module12,module14,module19,module3,module4,module5,module7,module9': 1,
+               'module10,module11': 1, 'module17': 1, 'module3,module7,module9': 1, 'module17,module18,module19': 1,
+               'module13,module14': 1, 'module3,module4,module9': 1}
+    if module in counter:
+        return counter[module]
+    else:
+        return 0
 
-def fault_code_to_cat_int(fault_code_str,i):
-    if i==0:
-        if fault_code_str=='cpu0':
+
+def fault_code_to_cat_int(fault_code_str, i):
+    if i == 0:
+        if fault_code_str == 'cpu0':
             return 0
-        elif fault_code_str=='cpu1':
+        elif fault_code_str == 'cpu1':
             return 1
         else:
             return 2
-    elif i==1:
+    elif i == 1:
         if fault_code_str.startswith('core'):
             return 0
         elif fault_code_str.startswith('cha'):
             return 1
         elif fault_code_str.startswith('m'):
             return 2
-        elif fault_code_str=='NA':
+        elif fault_code_str == 'NA':
             return 3
         else:
             return 4
-    elif i==2:
-        if fault_code_str=='cod2':
+    elif i == 2:
+        if fault_code_str == 'cod2':
             return 0
-        elif fault_code_str=='cod1':
+        elif fault_code_str == 'cod1':
             return 1
         else:
             return 2
     else:
-        if fault_code_str=='0xc':
+        if fault_code_str == '0xc':
             return 0
-        elif fault_code_str=='0x1':
+        elif fault_code_str == '0x1':
             return 1
-        elif fault_code_str=='NA':
+        elif fault_code_str == 'NA':
             return 2
         else:
             return 3
 
 
-
 class BaseFeatureExtractor:
 
-    def __init__(self, fault_df: pd.DataFrame, log_df: pd.DataFrame,crashdump_df:pd.DataFrame,
-                 venus_df:pd.DataFrame):
+    def __init__(self, fault_df: pd.DataFrame, log_df: pd.DataFrame, crashdump_df: pd.DataFrame,
+                 venus_df: pd.DataFrame):
         """
 
         :param fault_df: [sn,fault_time,Optional[label]]
@@ -66,12 +96,11 @@ class BaseFeatureExtractor:
         else:
             self.train = False
 
-        self.crashdump_df=crashdump_df
-        self.venus_df=venus_df
+        self.crashdump_df = crashdump_df
+        self.venus_df = venus_df
 
-        self.venus_feature_prefix='venus'
-        self.crashdump_feature_prefix='crashdump'
-
+        self.venus_feature_prefix = 'venus'
+        self.crashdump_feature_prefix = 'crashdump'
 
         self.num_feature_prefix = 'num_feature'
         self.log_feature_prefix = 'log_feature'
@@ -683,7 +712,6 @@ class BaseFeatureExtractor:
         # 加入日期统计特征
         num_feature_df = num_feature_df.merge(_fault_df, on=self.fault_df_columns, how='left').reset_index(drop=True)
 
-
         text_feature_df = _fault_df.copy(deep=True)
         for time_seconds_before_fault in [3600 * 24]:
             curr_text_feature_df = self._extract_logs_text_features(_overall_df, time_seconds_before_fault)
@@ -709,37 +737,44 @@ class BaseFeatureExtractor:
         #     if _col.startswith(self.log_sentences_feature_preifx):
         #         sentences_feature_df[_col] = sentences_feature_df[_col].fillna("")
 
-        venus_feature_df=self.fault_df.copy(deep=True)
-        venus_feature_df=venus_feature_df.merge(self.venus_df,how='left',on=['sn','fault_time']).reset_index(drop=True)
-        venus_feature_df=venus_feature_df.fillna('NA')
+        venus_feature_df = self.fault_df.copy(deep=True)
+        venus_feature_df = venus_feature_df.merge(self.venus_df, how='left', on=['sn', 'fault_time']).reset_index(
+            drop=True)
+        venus_feature_df = venus_feature_df.fillna('NA')
         print(venus_feature_df.columns)
 
-        venus_feature_df[f'{self.venus_feature_prefix}_has_venus_info']=0
-        venus_feature_df.loc[venus_feature_df['module']!='NA',f'{self.venus_feature_prefix}_has_venus_info']=1
+        venus_feature_df[f'{self.venus_feature_prefix}_has_venus_info'] = 0
+        venus_feature_df.loc[venus_feature_df['module'] != 'NA', f'{self.venus_feature_prefix}_has_venus_info'] = 1
 
         def _get_len_module(_module_str):
-            if _module_str=='NA':
+            if _module_str == 'NA':
                 return 0
             else:
                 return len(_module_str.split(','))
 
-        venus_feature_df[f"{self.venus_feature_prefix}_len_module"]=venus_feature_df['module'].apply(lambda val:_get_len_module(val))
+        venus_feature_df[f"{self.venus_feature_prefix}_len_module"] = venus_feature_df['module'].apply(
+            lambda val: _get_len_module(val))
+        venus_feature_df[f"{self.venus_feature_prefix}_catfeature_module"]=venus_feature_df['module'].apply(
+            lambda val:module_to_cat_int(val)
+        )
 
+        crashdump_feature_df = self.fault_df.copy(deep=True)
+        crashdump_feature_df = crashdump_feature_df.merge(self.crashdump_df, how='left',
+                                                          on=['sn', 'fault_time']).reset_index(drop=True)
+        crashdump_feature_df = crashdump_feature_df.fillna('NA.NA.NA.NA')
+        crashdump_feature_df[f"{self.crashdump_feature_prefix}_has_crashdump_info"] = 0
+        crashdump_feature_df.loc[crashdump_feature_df[
+                                     'fault_code'] != 'NA.NA.NA.NA', f"{self.crashdump_feature_prefix}_has_crashdump_info"] = 1
 
-        crashdump_feature_df=self.fault_df.copy(deep=True)
-        crashdump_feature_df=crashdump_feature_df.merge(self.crashdump_df,how='left',on=['sn','fault_time']).reset_index(drop=True)
-        crashdump_feature_df=crashdump_feature_df.fillna('NA.NA.NA.NA')
-        crashdump_feature_df[f"{self.crashdump_feature_prefix}_has_crashdump_info"]=0
-        crashdump_feature_df.loc[crashdump_feature_df['fault_code']!='NA.NA.NA.NA',f"{self.crashdump_feature_prefix}_has_crashdump_info"]=1
-
-        crash_fault_code_cols=[f"{self.crashdump_feature_prefix}_catfeature_{i}" for i in range(4)]
+        crash_fault_code_cols = [f"{self.crashdump_feature_prefix}_catfeature_{i}" for i in range(4)]
         crashdump_feature_df[crash_fault_code_cols] = crashdump_feature_df['fault_code'].str.split('.',
-                                                          3,
-                                                          expand=True,
-                                                          )
+                                                                                                   3,
+                                                                                                   expand=True,
+                                                                                                   )
         # _log_df[self.log_cols[0]] = _log_df['msg']
-        for i,col in enumerate(crash_fault_code_cols):
-            crashdump_feature_df[col]=crashdump_feature_df[col].apply(lambda val:fault_code_to_cat_int(val,i))
-            crashdump_feature_df[col]=crashdump_feature_df[col].astype(int)
+        for i, col in enumerate(crash_fault_code_cols):
+            crashdump_feature_df[col] = crashdump_feature_df[col].apply(lambda val: fault_code_to_cat_int(val, i))
+            crashdump_feature_df[col] = crashdump_feature_df[col].astype(int)
 
-        return num_feature_df, text_feature_df, sentences_feature_df, _log_df,venus_feature_df,crashdump_feature_df
+
+        return num_feature_df, text_feature_df, sentences_feature_df, _log_df, venus_feature_df, crashdump_feature_df

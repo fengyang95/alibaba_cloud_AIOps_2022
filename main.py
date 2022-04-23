@@ -90,7 +90,7 @@ class WorkFlow:
                            or 'tfidf_feature' in _col
                            # or 'doc2vec_feature' in _col
                            # or 'tf_feature' in _col
-                           or 'count_vec_feature' in _col
+                           # or 'count_vec_feature' in _col
                            ] + ['server_model'] + [_col for _col in df_all.columns if
                                                    _col.startswith('venus') or _col.startswith('crashdump')]
 
@@ -117,28 +117,36 @@ class WorkFlow:
         data_dict = self.get_samples(train=True)
         X = data_dict['X']
         y = data_dict['y']
-        # import numpy as np
-        # def analys(_X, _y):
-        #     _X_values=copy.deepcopy(X.values).astype(np.float)
-        #
-        #     print(f"{np.mean(_X_values,axis=0).shape}")
-        #
-        #     _X_values=(_X_values-np.mean(_X_values,axis=0))/np.std(_X_values,axis=0)
-        #     print(_X_values.shape)
-        #     N=len(_X_values)
-        #     A=np.zeros((N,N))
-        #     for i in range(N):
-        #         deta=np.sum(np.square(_X_values[i]-_X_values[i+1:]),axis=1)
-        #         A[i,i+1:]=deta
-        #         A[i+1:,i]=deta
-        #     return A
-        #
-        # A=analys(X, y)
-        # print(np.where(A<1e-2))
-        # print(np.percentile(A,5))
-        # print(np.percentile(A,1))
-        # print(np.percentile(A,0.1))
-        # print(np.percentile(A,0.01))
+        import numpy as np
+
+        def get_noise_samples(_X, _y):
+            noise_indices = set()
+            _X_values = copy.deepcopy(X.values).astype(np.float)
+
+            print(f"{np.mean(_X_values, axis=0).shape}")
+
+            _X_values = (_X_values - np.mean(_X_values, axis=0)) / (np.std(_X_values, axis=0) + 1e-10)
+            print(_X_values.shape)
+            N = len(_X_values)
+            A = np.zeros((N, N))
+            for i in range(N - 1):
+                delta = np.mean(np.square(_X_values[i] - _X_values[i + 1:]), axis=1)
+                equal_sample_index = np.where(delta < 0.001)[0]
+                for j in equal_sample_index:
+                    sample_index = j + i + 1
+                    if y[i] != y[sample_index]:
+                        # print(f"noise label: diff:{delta[j]} i:{i} j:{sample_index}  yi:{y[i]} yj:{y[sample_index]}")
+                        noise_indices.add(i)
+                        noise_indices.add(sample_index)
+            return noise_indices
+
+        noise_indices = get_noise_samples(X, y)
+        print(f"noise indices:{len(noise_indices)}")
+        from collections import Counter
+        print(F"NOISE:{Counter(y.iloc[list(noise_indices)].values)}")
+        valid_indices = [i for i in range(len(X)) if i not in noise_indices]
+        X = X.iloc[valid_indices].reset_index(drop=True)
+        y = y.iloc[valid_indices].reset_index(drop=True)
 
         tfidf_model_dict = data_dict['tfidf_model_dict']
         doc2vec_model = data_dict['doc2vec_model']
