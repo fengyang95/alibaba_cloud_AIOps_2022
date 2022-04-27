@@ -528,6 +528,7 @@ class BaseFeatureExtractor:
         fault_df['_'.join([self.num_feature_prefix, 'cos_day'])] = fault_df['fault_time'].apply(
             lambda val: self.cos_day(val))
 
+        #
         fault_df['_'.join([self.num_feature_prefix, 'is_day_time'])] = fault_df['fault_time'].apply(
             lambda val: self.is_daytime(val))
 

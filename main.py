@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 from code.features import TFIDFFeatureExtractor, BaseFeatureExtractor
-from code.classifier import BaggingClassifer
+from code.classifier import Classifer
 from code.utils.metrics import macro_f1_val
 import copy
 import logging
@@ -89,10 +89,9 @@ class WorkFlow:
                            _col.startswith('num_feature')
                            or 'tfidf_feature' in _col
                            # or 'doc2vec_feature' in _col
-                           # or 'tf_feature' in _col
                            # or 'count_vec_feature' in _col
-                           ] + ['server_model'] + [_col for _col in df_all.columns if
-                                                   _col.startswith('venus') or _col.startswith('crashdump')]
+                           ] + ['server_model']
+                         # + [_col for _col in df_all.columns if _col.startswith('venus') or _col.startswith('crashdump')]
 
         # feature_columns = [_col for _col in df_all.columns if _col.startswith('num_feature')] + ['server_model']
         print(f"features:{feature_columns}")
@@ -140,10 +139,11 @@ class WorkFlow:
                         noise_indices.add(sample_index)
             return noise_indices
 
-        noise_indices = get_noise_samples(X, y)
-        print(f"noise indices:{len(noise_indices)}")
-        from collections import Counter
-        print(F"NOISE:{Counter(y.iloc[list(noise_indices)].values)}")
+        # noise_indices = get_noise_samples(X, y)
+        # print(f"noise indices:{len(noise_indices)}")
+        # from collections import Counter
+        # print(F"NOISE:{Counter(y.iloc[list(noise_indices)].values)}
+        noise_indices={}
         valid_indices = [i for i in range(len(X)) if i not in noise_indices]
         X = X.iloc[valid_indices].reset_index(drop=True)
         y = y.iloc[valid_indices].reset_index(drop=True)
@@ -218,7 +218,7 @@ class WorkFlow:
         # # print(f"auc_train:{np.mean(auc_train_list):.4f}  auc_val:{np.mean(auc_val_list):.4f}")
         # probas = []
         #
-        cls = BaggingClassifer(k_fold=9, tuna=False)
+        cls = Classifer(k_fold=9, tuna=True)
         cat_features = [col for col in X.columns if 'catfeature' in col]
         cls.fit(X, y, cat_features=['server_model'] + cat_features)
         logging.info(f"train done!")

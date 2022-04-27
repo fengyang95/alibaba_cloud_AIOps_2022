@@ -1,1 +1,1 @@
-from .classifier import  HierarchicalClassifier,BaggingClassifer
+from .classifier import  HierarchicalClassifier,Classifer
