@@ -139,11 +139,11 @@ class WorkFlow:
                         noise_indices.add(sample_index)
             return noise_indices
 
-        # noise_indices = get_noise_samples(X, y)
+        noise_indices = get_noise_samples(X, y)
         # print(f"noise indices:{len(noise_indices)}")
         # from collections import Counter
         # print(F"NOISE:{Counter(y.iloc[list(noise_indices)].values)}
-        noise_indices={}
+        #noise_indices={}
         valid_indices = [i for i in range(len(X)) if i not in noise_indices]
         X = X.iloc[valid_indices].reset_index(drop=True)
         y = y.iloc[valid_indices].reset_index(drop=True)
