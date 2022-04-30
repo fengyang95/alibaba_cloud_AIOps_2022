@@ -207,7 +207,7 @@ class Classifer:
             #                   range(self.k_fold + 1)]
             self.lgb_list2 = [LGBMClassifier(class_weight=class_weight, **lgb_param2) for _ in range(self.k_fold+1)]
             self.lgb_list3=[LGBMClassifier(class_weight=class_weight,**lgb_param3) for _ in range(self.k_fold+1)]
-
+            print(f"len_features:{len(X.columns)}")
             kfold = KFold(n_splits=self.k_fold, shuffle=True, random_state=2022)
             f1_list = []
             for fold_index, (train_index, val_index) in enumerate(kfold.split(X)):

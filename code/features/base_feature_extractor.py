@@ -34,13 +34,29 @@ def module_to_cat_int(module):
                'module10,module11,module12,module14,module3,module4,module9': 1, 'module11,module3,module4': 1,
                'module10,module11,module3,module4,module8,module9': 1,
                'module10,module11,module19,module3,module4,module5,module9': 1, 'module19,module3,module4': 1,
-               'irpp1,pcie rootport a2:0.0,module10,module11,module12,module14,module19,module3,module4,module5,module7,module9': 1,
+               'irpp1,pcie rootport a2:0.0,module10,module11,module12,module14,module19,module3,module4,module5,'
+               'module7,module9': 1,
                'module10,module11': 1, 'module17': 1, 'module3,module7,module9': 1, 'module17,module18,module19': 1,
                'module13,module14': 1, 'module3,module4,module9': 1}
     if module in counter:
         return counter[module]
     else:
         return 0
+
+
+# def strip_all_entities(text):
+#     text=text.lower()
+#     text = re.sub('锛�', '', text)
+#     text = re.sub('锟絋', ' ', text)
+#     text = re.sub('锟�', '', text)
+#     #text = re.sub('\|', ',', text)
+#     text = re.sub('s4/s5:', 'derivedss_fourfive_stateflag',text)
+#     text = re.sub('s0/g0:', 'derivedsg_zerozero_stateflag',text)
+#     text = re.sub('s5/g2:', 'derivedsg_fivetwo_stateflag',text)
+#     text = re.sub('aa17.{22}', '', text)
+#     text = re.sub('000000', 'somespecialtags', text)
+#     text = re.sub('\d{4}\w\d\w\d{5}', 'asserted oem record', text)
+#     return text
 
 
 def fault_code_to_cat_int(fault_code_str, i):
@@ -755,8 +771,8 @@ class BaseFeatureExtractor:
 
         venus_feature_df[f"{self.venus_feature_prefix}_len_module"] = venus_feature_df['module'].apply(
             lambda val: _get_len_module(val))
-        venus_feature_df[f"{self.venus_feature_prefix}_catfeature_module"]=venus_feature_df['module'].apply(
-            lambda val:module_to_cat_int(val)
+        venus_feature_df[f"{self.venus_feature_prefix}_catfeature_module"] = venus_feature_df['module'].apply(
+            lambda val: module_to_cat_int(val)
         )
 
         crashdump_feature_df = self.fault_df.copy(deep=True)
@@ -776,6 +792,5 @@ class BaseFeatureExtractor:
         for i, col in enumerate(crash_fault_code_cols):
             crashdump_feature_df[col] = crashdump_feature_df[col].apply(lambda val: fault_code_to_cat_int(val, i))
             crashdump_feature_df[col] = crashdump_feature_df[col].astype(int)
-
 
         return num_feature_df, text_feature_df, sentences_feature_df, _log_df, venus_feature_df, crashdump_feature_df
