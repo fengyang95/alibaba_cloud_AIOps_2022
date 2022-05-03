@@ -157,7 +157,7 @@ class Classifer:
                 "subsample_freq": 1,
                 "min_child_samples": 20
             }
-            lgb_param2  = {
+            lgb_param2 = {
                 "n_estimators": 200,
                 "reg_alpha": 0.5,
                 "reg_lambda": 0.5,
