@@ -147,30 +147,19 @@ class Classifer:
 
         def fit(self, X, y, categorical_feature=None, class_weight=None):
 
-            lgb_param1 = {
-                "n_estimators": 200,
-                "reg_alpha": 0.6,
-                "reg_lambda": 0.9,
-                "num_leaves": 31,
-                "colsample_bytree": 0.5,
-                "subsample": 0.4,
-                "subsample_freq": 1,
-                "min_child_samples": 20
-            }
-            lgb_param2 = {
-                "n_estimators": 200,
-                "reg_alpha": 0.5,
-                "reg_lambda": 0.5,
-                "num_leaves": 31,
-                "colsample_bytree": 0.5,
-                "subsample": 0.4,
-                "subsample_freq": 1,
-                "min_child_samples": 30
-            }
-            lgb_param3 = {'n_estimators': 200, 'reg_alpha': 0.25,
-                          'reg_lambda': 0.2, 'num_leaves': 31,
-                          'colsample_bytree': 0.45, 'subsample': 0.9,
-                          'subsample_freq': 3, 'min_child_samples': 64}
+            lgb_param1 =  {'n_estimators': 243, 'reg_alpha': 0.10190006499393355,
+                           'reg_lambda': 4.529085326227521, 'num_leaves': 15,
+                           'colsample_bytree': 0.486704393068899, 'subsample': 0.6136591856797254,
+                           'subsample_freq': 4, 'min_child_samples': 46}
+            lgb_param2 =  {'n_estimators': 121, 'reg_alpha': 0.23214069098774093,
+                           'reg_lambda': 0.6643772879850578, 'num_leaves': 44,
+                           'colsample_bytree': 0.7079450590587428, 'subsample': 0.5131677103090537,
+                           'subsample_freq': 1, 'min_child_samples': 28}
+
+            lgb_param3 =  {'n_estimators': 162, 'reg_alpha': 3.018333689844611,
+                           'reg_lambda': 0.33920268654963737, 'num_leaves': 20,
+                           'colsample_bytree': 0.5129610441927995, 'subsample': 0.9468283604918678,
+                           'subsample_freq': 4, 'min_child_samples': 100}
 
             self.lgb_list1 = [LGBMClassifier(class_weight=class_weight, **lgb_param1) for _ in range(self.k_fold + 1)]
             # self.lgb_list2 = [CatBoostClassifier(class_weights=class_weight, verbose=False, n_estimators=1000) for

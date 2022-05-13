@@ -220,7 +220,7 @@ class WorkFlow:
         # # print(f"auc_train:{np.mean(auc_train_list):.4f}  auc_val:{np.mean(auc_val_list):.4f}")
         # probas = []
         #
-        cls = Classifer(k_fold=9, tuna=False)
+        cls = Classifer(k_fold=9, tuna=True)
         cat_features = [col for col in X.columns if 'catfeature' in col]
         cls.fit(X, y, cat_features=['server_model'] + cat_features)
         logging.info(f"train done!")
@@ -263,7 +263,7 @@ if __name__ == '__main__':
 
     log_df = pd.read_csv(os.path.join(data_dir, 'preliminary_sel_log_dataset.csv'))
     log_df2 = pd.read_csv(os.path.join(data_dir, 'preliminary_sel_log_dataset_a.csv'))
-    log_df3 = pd.read_csv(os.path.join(submit_dir, 'final_sel_log_dataset_a.csv'))
+    log_df3 = pd.read_csv(os.path.join(submit_dir, 'final_sel_log_dataset_b.csv'))
     log_df = pd.concat((log_df, log_df2, log_df3), axis=0).reset_index(drop=True)
 
     fault_label_df = pd.read_csv(os.path.join(data_dir, 'preliminary_train_label_dataset.csv'))
@@ -273,9 +273,9 @@ if __name__ == '__main__':
     fault_venus_df = pd.read_csv(os.path.join(data_dir, 'preliminary_venus_dataset.csv'))
     fault_crashdump_df = pd.read_csv(os.path.join(data_dir, 'preliminary_crashdump_dataset.csv'))
 
-    submit_df = pd.read_csv(os.path.join(submit_dir, 'final_submit_dataset_a.csv'))
-    submit_venus_df = pd.read_csv(os.path.join(submit_dir, 'final_venus_dataset_a.csv'))
-    submit_crashdump_df = pd.read_csv(os.path.join(submit_dir, 'final_crashdump_dataset_a.csv'))
+    submit_df = pd.read_csv(os.path.join(submit_dir, 'final_submit_dataset_b.csv'))
+    submit_venus_df = pd.read_csv(os.path.join(submit_dir, 'final_venus_dataset_b.csv'))
+    submit_crashdump_df = pd.read_csv(os.path.join(submit_dir, 'final_crashdump_dataset_b.csv'))
 
     extra_fault_df = submit_df.copy(deep=True)
     extra_fault_df['label'] = -1
