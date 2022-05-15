@@ -147,25 +147,48 @@ class Classifer:
 
         def fit(self, X, y, categorical_feature=None, class_weight=None):
 
-            lgb_param1 =  {'n_estimators': 243, 'reg_alpha': 0.10190006499393355,
-                           'reg_lambda': 4.529085326227521, 'num_leaves': 15,
-                           'colsample_bytree': 0.486704393068899, 'subsample': 0.6136591856797254,
-                           'subsample_freq': 4, 'min_child_samples': 46}
-            lgb_param2 =  {'n_estimators': 121, 'reg_alpha': 0.23214069098774093,
-                           'reg_lambda': 0.6643772879850578, 'num_leaves': 44,
-                           'colsample_bytree': 0.7079450590587428, 'subsample': 0.5131677103090537,
-                           'subsample_freq': 1, 'min_child_samples': 28}
+            lgb_param1 = {'n_estimators': 243, 'reg_alpha': 0.10190006499393355,
+                          'reg_lambda': 4.529085326227521, 'num_leaves': 15,
+                          'colsample_bytree': 0.486704393068899, 'subsample': 0.6136591856797254,
+                          'subsample_freq': 4, 'min_child_samples': 46}
+            lgb_param2 = {'n_estimators': 121, 'reg_alpha': 0.23214069098774093,
+                          'reg_lambda': 0.6643772879850578, 'num_leaves': 44,
+                          'colsample_bytree': 0.7079450590587428, 'subsample': 0.5131677103090537,
+                          'subsample_freq': 1, 'min_child_samples': 28}
 
-            lgb_param3 =  {'n_estimators': 162, 'reg_alpha': 3.018333689844611,
-                           'reg_lambda': 0.33920268654963737, 'num_leaves': 20,
-                           'colsample_bytree': 0.5129610441927995, 'subsample': 0.9468283604918678,
-                           'subsample_freq': 4, 'min_child_samples': 100}
+            lgb_param3 = {'n_estimators': 162, 'reg_alpha': 3.018333689844611,
+                          'reg_lambda': 0.33920268654963737, 'num_leaves': 20,
+                          'colsample_bytree': 0.5129610441927995, 'subsample': 0.9468283604918678,
+                          'subsample_freq': 4, 'min_child_samples': 100}
+
+            lgb_param4 = {'n_estimators': 122, 'reg_alpha': 1.5248965455976116,
+                          'reg_lambda': 3.191610084922332, 'num_leaves': 34,
+                          'colsample_bytree': 0.432366681321017, 'subsample': 0.8836395235516155,
+                          'subsample_freq': 3, 'min_child_samples': 37}
+            lgb_param5 = {'n_estimators': 392, 'reg_alpha': 4.554766191915926,
+                          'reg_lambda': 6.244308498776561, 'num_leaves': 32,
+                          'colsample_bytree': 0.7574796767537993, 'subsample': 0.7890369598922254,
+                          'subsample_freq': 4, 'min_child_samples': 44}
+
+            lgb_param6= {'n_estimators': 187, 'reg_alpha': 8.91246375225518,
+                         'reg_lambda': 2.7967663580318955, 'num_leaves': 37,
+                         'colsample_bytree': 0.6050376610030631, 'subsample': 0.6043461631199231,
+                         'subsample_freq': 3, 'min_child_samples': 81}
+
+            lgb_param7= {'n_estimators': 113, 'reg_alpha': 0.24100077205018797,
+                         'reg_lambda': 1.0685052865691247, 'num_leaves': 44,
+                         'colsample_bytree': 0.43475105037752615, 'subsample': 0.8563684980698903,
+                         'subsample_freq': 6, 'min_child_samples': 43}
 
             self.lgb_list1 = [LGBMClassifier(class_weight=class_weight, **lgb_param1) for _ in range(self.k_fold + 1)]
             # self.lgb_list2 = [CatBoostClassifier(class_weights=class_weight, verbose=False, n_estimators=1000) for
             # _ in range(self.k_fold + 1)]
             self.lgb_list2 = [LGBMClassifier(class_weight=class_weight, **lgb_param2) for _ in range(self.k_fold + 1)]
             self.lgb_list3 = [LGBMClassifier(class_weight=class_weight, **lgb_param3) for _ in range(self.k_fold + 1)]
+            self.lgb_list4 = [LGBMClassifier(class_weight=class_weight, **lgb_param4) for _ in range(self.k_fold + 1)]
+            self.lgb_list5 = [LGBMClassifier(class_weight=class_weight, **lgb_param5) for _ in range(self.k_fold + 1)]
+            self.lgb_list6 = [LGBMClassifier(class_weight=class_weight, **lgb_param4) for _ in range(self.k_fold + 1)]
+            self.lgb_list7 = [LGBMClassifier(class_weight=class_weight, **lgb_param5) for _ in range(self.k_fold + 1)]
 
             print(f"len_features:{len(X.columns)}")
             kfold = KFold(n_splits=self.k_fold, shuffle=True, random_state=2022)
@@ -182,20 +205,30 @@ class Classifer:
                 self.lgb_list1[fold_index].fit(X_train_aug, y_train_aug, categorical_feature=categorical_feature)
                 self.lgb_list2[fold_index].fit(X_train_aug, y_train_aug, categorical_feature=categorical_feature)
                 self.lgb_list3[fold_index].fit(X_train_aug, y_train_aug, categorical_feature=categorical_feature)
+                self.lgb_list4[fold_index].fit(X_train_aug, y_train_aug, categorical_feature=categorical_feature)
+                self.lgb_list5[fold_index].fit(X_train_aug, y_train_aug, categorical_feature=categorical_feature)
+                self.lgb_list6[fold_index].fit(X_train_aug, y_train_aug, categorical_feature=categorical_feature)
+                self.lgb_list7[fold_index].fit(X_train_aug, y_train_aug, categorical_feature=categorical_feature)
                 feature_importances = sorted(
                     [(col, val) for col, val in zip(X.columns, self.lgb_list1[fold_index].feature_importances_)],
                     key=lambda val: -val[1])
                 print(f"feature_importances:{feature_importances}")
                 preds = np.argmax(
                     self.lgb_list1[fold_index].predict_proba(X_val) + self.lgb_list2[fold_index].predict_proba(X_val) +
-                    self.lgb_list3[fold_index].predict_proba(X_val),
+                    self.lgb_list3[fold_index].predict_proba(X_val) +
+                    self.lgb_list4[fold_index].predict_proba(X_val) + self.lgb_list5[fold_index].predict_proba(X_val)+
+                    self.lgb_list6[fold_index].predict_proba(X_val)+self.lgb_list7[fold_index].predict_proba(X_val),
                     axis=1)
                 pred_labels = np.rint(preds)
 
                 preds_train = np.argmax(
-                    self.lgb_list1[fold_index].predict_proba(X_train) + self.lgb_list2[fold_index].predict_proba(
-                        X_train) +
-                    self.lgb_list3[fold_index].predict_proba(X_train),
+                    self.lgb_list1[fold_index].predict_proba(X_train) +
+                    self.lgb_list2[fold_index].predict_proba(X_train) +
+                    self.lgb_list3[fold_index].predict_proba(X_train) +
+                    self.lgb_list4[fold_index].predict_proba(X_train) +
+                    self.lgb_list5[fold_index].predict_proba(X_train)+
+                    self.lgb_list6[fold_index].predict_proba(X_train)+
+                    self.lgb_list7[fold_index].predict_proba(X_train),
                     axis=1)
                 f1_train = macro_f1_val(y_train, np.rint(preds_train))[0]
 
@@ -203,9 +236,7 @@ class Classifer:
                 print(f"fold_index:{fold_index} val_F1:{f1} train_F1:{f1_train}")
                 f1_list.append(f1)
             print(f"overall F1:{np.mean(f1_list)}")
-            # self.lgb_list1[-1].fit(X, y, categorical_feature=categorical_feature)
-            # self.lgb_list2[-1].fit(X, y, categorical_feature=categorical_feature)
-            # self.lgb_list3[-1].fit(X, y, categorical_feature=categorical_feature)
+
 
         def predict(self, X):
             y = None
@@ -221,7 +252,12 @@ class Classifer:
 
                 curr_y = np.argmax(self.lgb_list1[i].predict_proba(X)
                                    + self.lgb_list2[i].predict_proba(X) +
-                                   self.lgb_list3[i].predict_proba(X), axis=1)
+                                   self.lgb_list3[i].predict_proba(X) +
+                                   self.lgb_list4[i].predict_proba(X) +
+                                   self.lgb_list5[i].predict_proba(X)+
+                                   self.lgb_list6[i].predict_proba(X)+
+                                   self.lgb_list7[i].predict_proba(X)
+                                   , axis=1)
                 if y is None:
                     y = curr_y[:, np.newaxis]
                 else:
