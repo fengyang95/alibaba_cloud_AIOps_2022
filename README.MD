@@ -1,7 +1,2 @@
-## TODO 
-1. 分析各个类别的情况
-2. 挖掘关键词
-3. 挖掘sel日志时间分布
-4. 统计分析4个类别对应的高频词，剔除混淆词
-5. 分析baseline2的强特征 或者在新baseline中完全复现结果
-6. 分析难分样本
+https://tianchi.aliyun.com/competition/entrance/531947/introduction
+第三届阿里云磐久智维算法大赛 复赛Rank-8
